@@ -25,3 +25,15 @@ The research goal is to realize what are the factors (i.e., columns value) to po
   [1] Moro, S., Rita, P., & Vala, B. (2016). 
   Predicting social media performance metrics and evaluation of the impact on brand building: A data mining approach.
   Journal of Business Research, 69(9), 3341-3351.
+  
+  ## Examples:
+
+Histogram:
+
+![LifetimePostTotalReach_hist](https://github.com/nevoit/Data-Analysis-Statistics/blob/master/output/LifetimePostTotalReach_hist.png?raw=true)
+
+Box plot:
+
+![share_box_plot](https://github.com/nevoit/Data-Analysis-Statistics/blob/master/output/share_box_plot.png?raw=true)
+
+  
