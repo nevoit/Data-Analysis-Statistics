@@ -11,11 +11,21 @@ def column_descriptive_statistics(df, column):
     :param column:
     :return:
     """
+    assert isinstance(df, pd.DataFrame)
+    column_data = [x for x in (df[column].tolist()) if x != ' ']
+    temp_df = pd.DataFrame()
+    temp_df[column] = np.array(column_data)
+    print('Name ' + column)
     print(df[column].describe(include='all'))
-    print(describe(df[column]))
-    print('Median: ' + str(np.median(df[column])))
-    plt_column_hist(column, df)
-    plt_column_box_plot(column, df)
+
+    describ = describe(column_data)
+    print('Variance ' + str(describ.variance))
+    print('Kurtosis ' + str(describ.kurtosis))
+    print('Skewness ' + str(describ.skewness))
+    print('Median: ' + str(np.median(column_data)))
+
+    plt_column_hist(column, temp_df)
+    plt_column_box_plot(column, temp_df)
     print('')
 
 
@@ -51,13 +61,18 @@ def t_tests(df, column):
     # TODO: I'm not sure about that
     alg1 = df[df['Paid'] == 0][column]
     alg2 = df[df['Paid'] == 1][column]
+    alg1 = np.array([x for x in alg1 if x != ' '])
+    alg2 = np.array([x for x in alg2 if x != ' '])
     print('{} T tests for un-paid and paid posts'.format(column))
     print('Levene test')
-    print(levene(alg1, alg2))
+    levene_res = levene(alg1, alg2)
+    print(levene_res)
     print('T test independent')
-    print(ttest_ind(alg1, alg2))
-    print('T test relative')
-    print(ttest_rel(alg1, alg2))
+    var_equal = True if levene_res.pvalue > 0.05 else False
+    print("Variance is equal: " + str(var_equal))
+    print(ttest_ind(alg1, alg2, equal_var=var_equal))
+    # print('T test relative')
+    # print(ttest_rel(alg1, alg2))
     print()
 
 
@@ -72,38 +87,49 @@ def read_data_set(file_name):
     :return:
     """
     df_facebook = pd.read_excel(file_name)
-    df_facebook = df_facebook.fillna(0).replace(' ', 0).apply(pd.to_numeric)
+    # df_facebook = df_facebook.fillna(0).replace(' ', 0).apply(pd.to_numeric)
     print_title("Column headings")
     print(df_facebook.columns)
     return df_facebook
 
 
 def t_test_one_sample_summary(df, column_name, num):
-    print("Degrees of Freedom: {}".format(df[column_name].count()-1))
-    print("The mean is: {}".format(df[column_name].mean()))
-    print(ttest_1samp(df[column_name], num))
+    column_data = [x for x in (df[column_name].tolist()) if x != ' ']
+    temp_df = pd.DataFrame()
+    temp_df[column_name] = np.array(column_data)
+
+    print("Degrees of Freedom: {}".format(temp_df[column_name].count() - 1))
+    print("The mean is: {}".format(temp_df[column_name].mean()))
+    print(ttest_1samp(temp_df[column_name], num))
     print()
 
 
 def analyze_data_set(filename):
     df = read_data_set(filename)
 
+    print_title('Q2.1')
     print_title('Continuous variables')
     column_descriptive_statistics(df=df, column='comment')
     column_descriptive_statistics(df=df, column='like')
     column_descriptive_statistics(df=df, column='share')
     column_descriptive_statistics(df=df, column='LifetimePostTotalReach')
 
+    print_title('Q2.2')
     print_title('Discrete variables')
     column_descriptive_statistics(df=df, column='Category')
     column_descriptive_statistics(df=df, column='Paid')
     column_descriptive_statistics(df=df, column='PostWeekday')
 
+    print_title('Q2.3')
     print_title('T test, share h_0 = 25')
     t_test_one_sample_summary(df=df, column_name='share', num=25)
 
+    print_title('Q2.4')
     print_title('T test ...')
+    # t_tests(df, 'comment')
+    # t_tests(df, 'like')
     t_tests(df, 'share')
+    # t_tests(df, 'LifetimePostTotalReach')
 
     print_title('Comparing Results from Different Methods')
 
@@ -112,9 +138,11 @@ def comparing_different_methods():
     # TODO: I'm not sure about that
     methods_one = [0.9, 0.6, 0.6, 0.5, 0.9, 0.6, 0.7, 0.7, 0.6, 0.6]
     methods_second = [0.95, 0.65, 0.65, 0.5, 0.9, 0.65, 0.75, 0.75, 0.6, 0.6]
-    print(levene(methods_one, methods_second))
-    print('T test independent')
-    print(ttest_ind(methods_one, methods_second))
+    # print(levene(methods_one, methods_second))
+    # print('T test independent')
+    # print(ttest_ind(methods_one, methods_second))
+    print("Degrees of Freedom: {}".format(len(methods_one) - 1))
+    print("The mean is: {}".format(np.mean(methods_one)))
     print('T test relative')
     print(ttest_rel(methods_one, methods_second))
 
